@@ -2,24 +2,33 @@
 // FILO => add/delete element at the end stack
 
 class Stack {
+    // initiate empty stack
     constructor() {
         this.items = []
     }
+
+    // add element at the end
     push(item) {
         this.items.push(item)
     }
+
+    // if the stack is not empty, remove the last element
     pop() {
-        if (this.items.length === 0) {
-            return null
+        if (this.isEmpty()) {
+            throw 'Stack is empty'
         }
         return this.items.pop()
     }
+
+    // if the stack is not empty, read the last element
     getTop() {
-        if (this.items.length === 0) {
-            return null
+        if (this.isEmpty()) {
+            throw 'Stack is empty'
         }
         return this.items[this.items.length - 1]
     }
+
+    // decide whether stack is empty or not
     isEmpty() {
         return this.items.length === 0
     }
@@ -69,5 +78,5 @@ function bracketMatch(str) {
 
 console.log(bracketMatch('({]})'))
 console.log(bracketMatch('({[]})'))
-console.log(bracketMatch('()[]{(])}'))
+console.log(bracketMatch('()[]{([])}'))
 
