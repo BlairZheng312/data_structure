@@ -9,7 +9,7 @@ class Node {
     }
 }
 
-class LinkedList {
+export class LinkedList {
     constructor(node) {
         this.head = node != undefined ? new Node(node) : null
     }
@@ -61,7 +61,7 @@ class LinkedList {
 
     // connect new node with current next node
     // then break the connection between current node and current next node
-    // then connect current with new node
+    // then connect current node with new node
     insert(item, index) {
         if (index === 0) {
             this.add(item)
@@ -98,16 +98,3 @@ class LinkedList {
         return arr
     }
 }
-
-let linkedList = new LinkedList()
-linkedList.add(1)
-linkedList.add(2)
-linkedList.add(3)
-linkedList.add(4)
-linkedList.insert(5, 2)
-linkedList.remove(3)
-
-console.log(linkedList.length())
-console.log(linkedList.find(2).item)
-console.log(linkedList.findByValue(6))
-console.log(linkedList.toArray())
