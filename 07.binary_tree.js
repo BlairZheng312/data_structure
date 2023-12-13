@@ -27,7 +27,7 @@ let root = a
 
 // 4 types of travesal of binary-tree
 function preOrder(root) {
-    if (root !== null) {
+    if (root) {
         console.log(root.node)
         preOrder(root.leftChild)
         preOrder(root.rightChild)
@@ -35,7 +35,7 @@ function preOrder(root) {
 }
 
 function inOrder(root) {
-    if (root !== null) {
+    if (root) {
         inOrder(root.leftChild)
         console.log(root.node)
         inOrder(root.rightChild)
@@ -43,7 +43,7 @@ function inOrder(root) {
 }
 
 function postOrder(root) {
-    if (root !== null) {
+    if (root) {
         postOrder(root.leftChild)
         postOrder(root.rightChild)
         console.log(root.node)
@@ -56,10 +56,10 @@ function levelOrder(root) {
     while (queue.length > 0) {
         let root = queue.shift()
         console.log(root.node)
-        if (root.leftChild !== null) {
+        if (root.leftChild) {
             queue.push(root.leftChild)
         }
-        if (root.rightChild !== null) {
+        if (root.rightChild) {
             queue.push(root.rightChild)
         }
     }
