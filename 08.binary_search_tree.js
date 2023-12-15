@@ -1,5 +1,6 @@
 // binary search tree: keys of left sub-tree are smaller than the node's key, while the right greater
 // binary search tree combined with in-order travesal can sort the tree in order
+// time complexity: O(logn) => if the tree is balanced
 
 class BinaryTree {
     constructor(data) {
@@ -83,31 +84,63 @@ class BST {
             throw 'Cannot find the data'
         } else {
             let { node, child } = this.query(value)
-            if (node) {
-                // if the node has no child node, set the node to null
-                if (!node.leftChild && !node.rightChild) {
+
+            // if the node has no child node, set the node to null
+            if (!node.leftChild && !node.rightChild) {
+                if (!node.parent) {
+                    this.root = null
+                } else {
                     node.parent[child] = null
                 }
+            }
 
-                // if the node has only left child
-                // connect its parent with its left child
-                else if (!node.rightChild) {
+            // if the node has only left child
+            // connect its parent with its left child
+            else if (!node.rightChild) {
+                if (!node.parent) {
+                    this.root = node.leftChild
+                    node.leftChild.parent = null
+                } else {
                     node.parent[child] = node.leftChild
+                    node.leftChild.parent = node.parent
                 }
+            }
 
-                // if the node has only right child
-                // connect its parent with its right child
-                else if (!node.leftChild) {
+            // if the node has only right child
+            // connect its parent with its right child
+            else if (!node.leftChild) {
+                if (!node.parent) {
+                    this.root = node.rightChild
+                    node.rightChild.parent = null
+                } else {
                     node.parent[child] = node.rightChild
+                    node.rightChild.parent = node.parent
+                }
+            }
+
+            // if the node has both left & right child
+            else {
+                let minNode = this.findMinNode(node.rightChild)
+                let minChild = this.query(minNode.data).child
+
+                // switch its value with the min-node of its right-sub-tree
+                if (!node.parent) {
+                    this.root.data = minNode.data
+                } else {
+                    node.parent[child].data = minNode.data
                 }
 
-                // if the node has both left & right child
-                // switch its value with the min-node of its right-sub-tree
-                // set the min-node to null
+                // if the min-node of its right-sub-tree has right child
+                // connect min-node's parent with min-node's child  
+                if (minNode.rightChild) {
+                    minNode.parent[minChild] = minNode.rightChild
+                    minNode.rightChild.parent = minNode.parent
+                }
+
+                // if the min-node of its right-sub-tree has no child
+                // set the min-node to null 
                 else {
-                    let minNode = this.findMinNode(node.rightChild)
-                    node.parent[child].data = minNode.data
-                    minNode.parent.leftChild = minNode.leftChild
+                    minNode.parent[minChild] = null
                 }
             }
         }
@@ -117,12 +150,18 @@ class BST {
 let bts = new BST()
 
 bts.fromArr([4, 2, 3, 1, 7, 9, 8, 6, 5])
-bts.delete(3)
-bts.delete(5)
-bts.delete(7)
-// bts.delete(11)
-bts.insert(bts.root, 23)
+// bts.delete(1)
+// bts.delete(2)
+// bts.delete(3)
+// bts.delete(4)
+// bts.delete(5)
+// bts.delete(6)
+// bts.delete(7)
+// bts.delete(8)
+// bts.delete(9)
+// bts.delete(10)
 bts.inOrder(bts.root)
 
-// console.log(bts.query(9))
+// console.log(bts.query(3))
 // console.log(bts.query(20))
+
