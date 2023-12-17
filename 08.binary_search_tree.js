@@ -18,7 +18,8 @@ class BST {
 
     // insert nodes following binary search tree pattern
     // do not insert duplicated nodes
-    insert(node, value) {
+    // recursive
+    insertByNode(node, value) {
         if (!this.root) {
             this.root = new BinaryTree(value)
         } else {
@@ -35,19 +36,60 @@ class BST {
         }
     }
 
+    // insert nodes following binary search tree pattern
+    // do not insert duplicated nodes
+    // non-recursive
+    insert(value) {
+        let node = this.root
+        if (!node) {
+            this.root = new BinaryTree(value)
+        } else {
+            while (true) {
+                if (value < node.data) {
+                    if (node.leftChild) {
+                        node = node.leftChild
+                    } else {
+                        node.leftChild = new BinaryTree(value)
+                        node.leftChild.parent = node
+                        break
+                    }
+                } else if (value > node.data) {
+                    if (node.rightChild) {
+                        node = node.rightChild
+                    } else {
+                        node.rightChild = new BinaryTree(value)
+                        node.rightChild.parent = node
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
     // build binary search tree from arr
     fromArr(arr) {
         for (let item of arr) {
-            this.insert(this.root, item)
+            this.insert(item)
         }
     }
 
     // use in_order travesal to sort binary search tree
-    inOrder(root) {
+    inOrder(root = this.root) {
         if (root) {
             this.inOrder(root.leftChild)
-            console.log(root.data)
+            process.stdout.write(`${root.data}`)
             this.inOrder(root.rightChild)
+        }
+    }
+
+    // use pre_order & in_order to rebuild binary search tree => to verify AVL tree
+    preOrder(root = this.root) {
+        if (root) {
+            process.stdout.write(`${root.data}`)
+            this.preOrder(root.leftChild)
+            this.preOrder(root.rightChild)
         }
     }
 
@@ -147,21 +189,4 @@ class BST {
     }
 }
 
-let bts = new BST()
-
-bts.fromArr([4, 2, 3, 1, 7, 9, 8, 6, 5])
-// bts.delete(1)
-// bts.delete(2)
-// bts.delete(3)
-// bts.delete(4)
-// bts.delete(5)
-// bts.delete(6)
-// bts.delete(7)
-// bts.delete(8)
-// bts.delete(9)
-// bts.delete(10)
-bts.inOrder(bts.root)
-
-// console.log(bts.query(3))
-// console.log(bts.query(20))
-
+export { BinaryTree, BST }
