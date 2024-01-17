@@ -35,11 +35,26 @@ function preOrder(root) {
 }
 
 function inOrder(root) {
+    // recursive
     if (root) {
         inOrder(root.leftChild)
         console.log(root.node)
         inOrder(root.rightChild)
     }
+
+    // // non-recursive
+    // let stack = []
+    // let node = root
+    // while (node || stack.length !== 0) {
+    //     if (node) {
+    //         stack.push(node)
+    //         node = node.leftChild
+    //     } else {
+    //         node = stack.pop()
+    //         console.log(node.node)
+    //         node = node.rightChild
+    //     }
+    // }
 }
 
 function postOrder(root) {
@@ -66,6 +81,6 @@ function levelOrder(root) {
 }
 
 // preOrder(root)
-// inOrder(root)
+inOrder(root)
 // postOrder(root)
-levelOrder(root)
+// levelOrder(root)

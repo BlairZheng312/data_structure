@@ -7,19 +7,35 @@ import { BinaryTree, BST } from "./08.binary_search_tree.js";
 class AVLNode extends BinaryTree {
     constructor(data) {
         super(data)
-        // balance factor 
-        // => right sub tree higher then left sub tree: 1
-        // => left sub tree higher then right sub tree: -1
-        // => balanced: 0
-        this.bf = 0
+        this.height = 1
     }
 }
 
 class AVLTree extends BST {
+    getHeight(pNode) {
+        if (pNode) {
+            return pNode.height
+        } else {
+            return 0
+        }
+    }
+
+    updateHeight(pNode) {
+        pNode.height = 1 + Math.max(this.getHeight(pNode.leftChild), this.getHeight(pNode.rightChild))
+    }
+
+    // balance factor => rightSubTree.height - leftSubTree.height
+    // should be -1, 0, 1, otherwize rotate tree to achieve balance
+    getBalanceFactor(pNode) {
+        return this.getHeight(pNode?.rightChild) - this.getHeight(pNode?.leftChild)
+    }
+
     // insert to the right child of the right sub tree => break the balance
     // left rotate
-    rotateLeft(pNode, cNode) {
+    rotateLeft(pNode) {
+        let cNode = pNode.rightChild
         let cLeft = cNode.leftChild
+
         pNode.rightChild = cLeft
         if (cLeft) {
             cLeft.parent = pNode
@@ -28,16 +44,18 @@ class AVLTree extends BST {
         cNode.leftChild = pNode
         pNode.parent = cNode
 
-        cNode.bf = 0
-        pNode.bf = 0
+        this.updateHeight(pNode)
+        this.updateHeight(cNode)
 
         return cNode
     }
 
     // insert to the left child of the left sub tree => break the balance
     // right rotate
-    rotateRight(pNode, cNode) {
+    rotateRight(pNode) {
+        let cNode = pNode.leftChild
         let cRight = cNode.rightChild
+
         pNode.leftChild = cRight
         if (cRight) {
             cRight.parent = pNode
@@ -46,203 +64,91 @@ class AVLTree extends BST {
         cNode.rightChild = pNode
         pNode.parent = cNode
 
-        cNode.bf = 0
-        pNode.bf = 0
+        this.updateHeight(pNode)
+        this.updateHeight(cNode)
 
         return cNode
     }
 
-    // insert to the left child of the right sub tree => break the balance
-    // first right rotate, then left rotate
-    rotateRightLeft(pNode, cNode) {
-        let gNode = cNode.leftChild
-
-        let gRight = gNode.rightChild
-        cNode.leftChild = gRight
-        if (gRight) {
-            gRight.parent = cNode
+    rebalance(pNode) {
+        let bf = this.getBalanceFactor(pNode)
+        let cNode
+        if (bf === 2) {
+            if (this.getBalanceFactor(pNode.rightChild) < 0) {
+                let cNode = this.rotateRight(pNode.rightChild)
+                pNode.rightChild = cNode
+                cNode.parent = pNode
+            }
+            return this.rotateLeft(pNode)
+        } else if (bf === -2) {
+            if (this.getBalanceFactor(pNode.rightChild) > 0) {
+                cNode = this.rotateLeft(pNode.leftChild)
+                pNode.rightChild = cNode
+                cNode.parent = pNode
+            }
+            return this.rotateRight(pNode)
         }
-
-        gNode.rightChild = cNode
-        cNode.parent = gNode
-
-        let gLeft = gNode.leftChild
-        pNode.rightChild = gLeft
-        if (gLeft) {
-            gLeft.parent = pNode
-        }
-
-        gNode.leftChild = pNode
-        pNode.parent = gNode
-
-        if (gNode.bf > 0) {
-            cNode.bf = 0
-            pNode.bf = -1
-        } else if (gNode.bf < 0) {
-            cNode.bf = 1
-            pNode.bf = 0
-        } else {
-            cNode.bf = 0
-            pNode.bf = 0
-        }
-        gNode.bf = 0
-        return gNode
     }
 
-    // insert to the right child of the left sub tree => break the balance
-    // first left rotate, then right rotate
-    rotateLeftRight(pNode, cNode) {
-        let gNode = cNode.rightChild
+    maintain(pNode) {
+        let aNode = pNode.parent
+        let rotatedNode = this.rebalance(pNode)
+        if (rotatedNode) {
+            // to connect the grand-parent node with the rotated node
+            rotatedNode.parent = aNode
+            // if there is grand-parent node, the rotated node will be its child node
+            if (aNode) {
+                if (pNode === aNode.leftChild) {
+                    aNode.leftChild = rotatedNode
+                } else {
+                    aNode.rightChild = rotatedNode
+                }
+            }
 
-        let gLeft = gNode.leftChild
-        cNode.rightChild = gLeft
-        if (gLeft) {
-            gLeft.parent = cNode
+            // if there is no grand-parent node, the rotated node will be the root
+            else {
+                this.root = rotatedNode
+                rotatedNode.parent = null
+            }
         }
 
-        gNode.leftChild = cNode
-        cNode.parent = gNode
-
-        let gRight = gNode.rightChild
-        pNode.leftChild = gRight
-        if (gRight) {
-            gRight.parent = pNode
+        this.updateHeight(pNode)
+        if (pNode.parent) {
+            this.maintain(pNode.parent)
         }
-
-        gNode.rightChild = pNode
-        pNode.parent = gNode
-
-        if (gNode.bf > 0) {
-            cNode.bf = -1
-            pNode.bf = 0
-        } else if (gNode.bf < 0) {
-            cNode.bf = 0
-            pNode.bf = 1
-        } else {
-            cNode.bf = 0
-            pNode.bf = 0
-        }
-
-        gNode.bf = 0
-        return gNode
     }
 
     insert(value) {
         // insert the node as BST pattern
-        let node = this.root
+        let pNode = this.root
         let cNode = null
-        if (!node) {
-            cNode = new AVLNode(value)
-            this.root = cNode
+        if (!pNode) {
+            this.root = new AVLNode(value)
         } else {
             while (true) {
-                if (value < node.data) {
-                    if (node.leftChild) {
-                        node = node.leftChild
+                if (value < pNode.data) {
+                    if (pNode.leftChild) {
+                        pNode = pNode.leftChild
                     } else {
                         cNode = new AVLNode(value)
-                        node.leftChild = cNode
-                        cNode.parent = node
+                        pNode.leftChild = cNode
+                        cNode.parent = pNode
+                        this.maintain(pNode)
                         break
                     }
-                } else if (value > node.data) {
-                    if (node.rightChild) {
-                        node = node.rightChild
+                } else if (value > pNode.data) {
+                    if (pNode.rightChild) {
+                        pNode = pNode.rightChild
                     } else {
                         cNode = new AVLNode(value)
-                        node.rightChild = cNode
-                        cNode.parent = node
+                        pNode.rightChild = cNode
+                        cNode.parent = pNode
+                        this.maintain(pNode)
                         break
                     }
                 } else {
                     return
                 }
-            }
-        }
-
-        // update the balance factor for the tree
-        // rotate the tree based on the balance factor
-        while (cNode.parent) {
-            let aNode
-            let node
-            let pNode
-
-            // if the node is from the left sub tree, balance factor influence will be -1
-            if (cNode.parent.leftChild === cNode) {
-                // if the parent tree is left-twisted (bf === -1)
-                // after updated, bf will be -2
-                // => need to rotate to retore balance
-                if (cNode.parent.bf < 0) {
-                    aNode = cNode.parent.parent
-                    pNode = cNode.parent
-                    
-                    // if the current tree is right-twisted, rotate left first then rotate right
-                    if (cNode.bf > 0) {
-                        node = this.rotateLeftRight(cNode.parent, cNode)
-                    }
-
-                    // if the node is left-twisted, rotate right
-                    else {
-                        node = this.rotateRight(cNode.parent, cNode)
-                    }
-                }
-
-                // if the tree is right-twisted (bf === 1)
-                // after updated, bf will be 0
-                // tree will be balanced, break from the loop
-                else if (cNode.parent.bf > 0) {
-                    cNode.parent.bf = 0
-                    break
-                }
-
-                // if the tree is balanced (bf === 0)
-                // after updated, bf will be -1 (still balanced)
-                // move node up to parent node to make any rotation as needed
-                // skip current loop
-                else {
-                    cNode.parent.bf = -1
-                    cNode = cNode.parent
-                    continue
-                }
-            }
-
-            // the opposite of above situation
-            else {
-                if (cNode.parent.bf > 0) {
-                    aNode = cNode.parent.parent
-                    pNode = cNode.parent
-                    if (cNode.bf < 0) {
-                        node = this.rotateRightLeft(cNode.parent, cNode)
-                    } else {
-                        node = this.rotateLeft(cNode.parent, cNode)
-                    }
-                } else if (cNode.parent.bf < 0) {
-                    cNode.parent.bf = 0
-                    break
-                } else {
-                    cNode.parent.bf = 1
-                    cNode = cNode.parent
-                    continue
-                }
-            }
-
-            // to connect the grand-parent node with the rotated node
-            node.parent = aNode
-
-            // if there is grand-parent node, the rotated node will be its child node
-            if (aNode) {
-                if (pNode === aNode.leftChild) {
-                    aNode.leftChild = node
-                } else {
-                    aNode.rightChild = node
-                }
-                break
-            } 
-
-            // if there is no grand-parent node, the rotated node will be the root
-            else {
-                this.root = node
-                break
             }
         }
     }
