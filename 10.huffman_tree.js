@@ -1,11 +1,13 @@
 // Huffman tree => to contruct the binary tree with minimum WPL (weighted path length)
 
 class HuffmanTreeNode {
-    constructor(weight) {
+    constructor(char, weight) {
+        this.char = char
         this.weight = weight
         this.leftChild = null
         this.rightChild = null
         this.parent = null
+        this.code = null
     }
 }
 
@@ -13,7 +15,7 @@ class HuffmanTree {
     initHuffmanNode(arr) {
         let huffmanNode = []
         for (let item of arr) {
-            huffmanNode.push(new HuffmanTreeNode(item))
+            huffmanNode.push(new HuffmanTreeNode(item.char, item.weight))
         }
         return huffmanNode
     }
@@ -47,7 +49,7 @@ class HuffmanTree {
             // find the smallest two nodes to create new sub tree
             let { first, second } = this.selectNode(huffmanNode)
             let weight = huffmanNode[first].weight + huffmanNode[second].weight
-            let newHuffmanNode = new HuffmanTreeNode(weight)
+            let newHuffmanNode = new HuffmanTreeNode(null, weight)
 
             // link new node with child nodes
             newHuffmanNode.leftChild = first
@@ -61,9 +63,34 @@ class HuffmanTree {
         return huffmanNode
     }
 
+    // left branch => 0, right branch => 1
+    huffmanEncode(arr) {
+        let charTable = this.fromArr(arr)
+        let charCount = arr.length
+        for (let i = 0; i < charCount; i++) {
+            let charPath = []
+            let charNode = charTable[i]
+            while (charNode.parent !== null) {
+                if (charTable[charTable[charNode.parent].leftChild] === charNode) {
+                    charPath.push(0)
+                } else {
+                    charPath.push(1)
+                }
+                charNode = charTable[charNode.parent]
+            }
+            charTable[i].code = charPath.reverse().join('')
+        }
+        return charTable
+    }
 }
 
 let huffmanTree = new HuffmanTree
 
-console.log(huffmanTree.fromArr([7, 5, 5, 2, 4]))
+console.log(huffmanTree.huffmanEncode([
+    { char: 'A', weight: 7 },
+    { char: 'B', weight: 5 },
+    { char: 'C', weight: 5 },
+    { char: 'D', weight: 2 },
+    { char: 'E', weight: 4 },
+]))
 
