@@ -23,16 +23,15 @@ class Graph {
         let visited = Array.from({ length: this.vNum }, () => 0)
         let queue = []
         let v1 = 0
-        console.log(v1)
-        visited[v1] = 1
         queue.push(v1)
+        visited[v1] = 1
         while (queue.length > 0) {
             let v1 = queue.shift()
+            console.log(v1)
             for (let v2 = 0; v2 < this.vNum; v2++) {
                 if (this.adjacencyMatrix[v1][v2] !== 0 && !visited[v2]) {
-                    console.log(v2)
-                    visited[v2] = 1
                     queue.push(v2)
+                    visited[v2] = 1
                 }
             }
         }
